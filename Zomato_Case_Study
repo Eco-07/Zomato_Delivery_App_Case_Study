@@ -1,0 +1,237 @@
+library(dplyr)
+library(coin)
+library(moments)
+library(ggplot2)
+
+# Read the data
+data_zomato <- read.csv("zomato_data.csv")
+
+#BELOW IS FOR THE NORMALITY TEST
+
+# Plot histogram
+hist(data_zomato$Time_Taken_mins, main = "jkdhvjkfhvfkjjv", xlab = "Delivery Time (mins)", col = "grey", border = "black")
+# Plot histogram
+hist(data_zomato$Delivery_person_Age, main = "Distribution - Age of Delivery Persons", xlab = "Delivery Persons' Age", col = "lightblue", border = "black")
+hist(data_zomato$distance_km, main = "Distribution - Distance in km", xlab = "Distance in km", col = "lightblue", border = "black")
+# Compute skewness and kurtosis
+skew_value_time_mins <- skewness(data_zomato$Time_Taken_mins)
+kurtosis_value_time_mins <- kurtosis(data_zomato$Time_Taken_mins)
+
+# Compute skewness and kurtosis
+skew_value_age <- skewness(data_zomato$Delivery_person_Age)
+kurtosis_value_age <- kurtosis(data_zomato$Delivery_person_Age)
+
+# Compute skewness and kurtosis
+skew_value_distance <- skewness(data_zomato$distance_km)
+kurtosis_value_distance <- kurtosis(data_zomato$distance_km)
+
+#END OF CODE FOR NORMALITY TEST
+
+# Convert to dummy variables
+data_for_kruskal <- within(data_zomato, {
+  motorcycle <- as.numeric(Type_of_vehicle == "motorcycle")
+  scooter <- as.numeric(Type_of_vehicle == "scooter")
+  electric_scooter <- as.numeric(Type_of_vehicle == "electric_scooter")
+})
+
+# Convert to a factor
+data_for_kruskal$Type_of_vehicle <- as.factor(data_for_kruskal$Type_of_vehicle)
+
+# Perform Kruskal-Wallis test
+result_kruskal <- kruskal.test(Time_Taken_mins ~ Type_of_vehicle, data = data_for_kruskal)
+print(result_kruskal)
+
+
+# Convert to dummy variables
+data_for_kruskal_days <- within(data_zomato, {
+  Mon <- as.numeric(weekday_name == "MON")
+  Tue <- as.numeric(weekday_name == "TUE")
+  Wed <- as.numeric(weekday_name == "WED")
+  Thu <- as.numeric(weekday_name == "THU")
+  Fri <- as.numeric(weekday_name == "FRI")
+  Sat <- as.numeric(weekday_name == "SAT")
+  Sun <- as.numeric(weekday_name == "SUN")
+})
+
+# Convert to a factor
+data_for_kruskal_days$weekday_name <- as.factor(data_for_kruskal_days$weekday_name)
+
+# Perform Kruskal-Wallis test
+result_kruskal_days <- kruskal.test(daily_sales_value ~ weekday_name, data = data_for_kruskal_days)
+print(result_kruskal_days)
+
+# Convert to dummy variables
+data_for_kruskal_order_type <- within(data_zomato, {
+  Jan <- as.numeric(month_name == "JAN")
+  Feb <- as.numeric(month_name == "FEB")
+  Mar <- as.numeric(month_name == "MAR")
+  Apr <- as.numeric(month_name == "APR")
+  May <- as.numeric(month_name == "MAY")
+  Jun <- as.numeric(month_name == "JUN")
+  Jul <- as.numeric(month_name == "JUL")
+  Aug <- as.numeric(month_name == "AUG")
+  Sep <- as.numeric(month_name == "SEP")
+  Oct <- as.numeric(month_name == "OCT")
+  Nov <- as.numeric(month_name == "NOV")
+  Dec <- as.numeric(month_name == "DEC")
+  
+})
+
+# Convert to a factor
+data_for_kruskal_order_type$month_name <- as.factor(data_for_kruskal_order_type$month_name)
+
+# Perform Kruskal-Wallis test
+result_kruskal_order_type <- kruskal.test(daily_sales_value ~ month_name, data = data_for_kruskal_order_type)
+print(result_kruskal_order_type)
+
+# Convert to a factor
+data_for_kruskal_weatherconditions$dominant_weather_type <- as.factor(data_for_kruskal_weatherconditions$dominant_weather_type)
+
+# Perform Kruskal-Wallis test
+result_kruskal_weather <- kruskal.test(daily_sales_value ~ dominant_weather_type, data = data_for_kruskal_weatherconditions)
+print(result_kruskal_weather)
+
+# Convert City_Type to ordinal numeric values
+data_for_kruskal_citytype <- within(data_zomato, {
+  City_Type_Numeric <- as.numeric(factor(City_Type, levels = c("Semi-Urban", "Urban", "Metropolitan")))
+})
+
+
+# Perform Kruskal-Wallis test
+result_kruskal_city <- kruskal.test(Time_Taken_mins ~ City_Type, data = data_for_kruskal_citytype)
+print(result_kruskal_city)
+
+#BELOW IS THE CODE FOR MANN-WHITNEY U- TEST
+
+# Convert to dummy variables
+data_for_mann_festival <- within(data_zomato, {
+  Sunny <- as.numeric(Weatherconditions == "Sunny")
+  Cloudy <- as.numeric(Weatherconditions == "Cloudy")
+  Stormy <- as.numeric(Weatherconditions == "Stormy")
+  Sandstorms <- as.numeric(Weatherconditions == "Sandstorms")
+  Fog <- as.numeric(Weatherconditions == "Fog")
+  Windy <- as.numeric(Weatherconditions == "Windy")
+})
+
+# Convert to a factor
+data_for_kruskal_weatherconditions$Weatherconditions <- as.factor(data_for_kruskal_weatherconditions$Weatherconditions)
+
+# Perform Kruskal-Wallis test
+result_kruskal_weather <- kruskal.test(Time_Taken_mins ~ Weatherconditions, data = data_for_kruskal_weatherconditions)
+print(result_kruskal_weather)
+
+
+
+#BELOW IS FOR SPEARMAN'S RANK CORRELATION
+cor_result_age <- cor.test(data_zomato$daily_sales_value, data_zomato$dominant_temp_category, method = "spearman")
+print(cor_result_age)
+
+# computation
+cor_result_ratings <- cor.test(data_zomato$Delivery_person_Age, data_zomato$Delivery_person_Ratings, method = "spearman")
+print(cor_result_ratings)
+
+# computation
+cor_result_hour <- cor.test(data$Hour, data$Time_Taken_mins, method = "spearman")
+print(cor_result_hour)
+
+# Create a new dataframe with the count of deliveries for each hour
+delivery_count_data <- data %>%
+  group_by(Hour) %>%
+  summarize(Delivery_Count = n())
+
+
+cor_result_delivery_h <- cor.test(delivery_count_data$Hour, delivery_count_data$Delivery_Count, method = "spearman")
+
+# Print the result
+print(cor_result_delivery_h)
+
+# computation
+cor_result_distance <- cor.test(data$distance_km, data$Time_Taken_mins, method = "spearman")
+print(cor_result_distance)
+
+# Computation of Spearman's Rank Correlation
+cor_result_hour_delivery <- cor.test(delivery_counts$Hour, delivery_counts$Delivery_Person_ID, method = "spearman")
+
+# Printing the result
+print(cor_result_hour_delivery)
+
+
+
+#CHI-SQUARE TEST OF INDEPENDENCE
+
+# Create a contingency table
+contingency_table <- table(data_zomato$Weatherconditions, data_zomato$Type_of_vehicle)
+
+# Perform the chi-square test
+chi_square_result <- chisq.test(contingency_table)
+
+# Print the result
+print(chi_square_result)
+
+# Create a contingency table
+contingency_table_2 <- table(data_zomato$Weatherconditions, data_zomato$Type_of_order)
+
+# Perform the chi-square test
+chi_square_result_2 <- chisq.test(contingency_table_2)
+
+# Print the result
+print(chi_square_result_2)
+
+
+ggplot(data_zomato, aes(x = weekday_name, y = daily_sales_value, fill = weekday_name)) +
+  geom_bar(stat = "summary", position = "dodge") +
+  labs(title = "Average Delivery Time(mins) Festival and Non-Festival",
+       x = "",
+       y = "Avg Delivery Time(mins)") +
+  theme_minimal()
+
+ggplot(data_zomato, aes(x = dominant_weather_type, y = daily_sales_value, fill = dominant_weather_type)) +
+  geom_boxplot() +
+  labs(title = "Sales by Weather",
+       x = "Weather",
+       y = "Sales") +
+  theme_minimal()
+
+ggplot(data_zomato, aes(x = Festival, y = Time_Taken_mins, fill = Festival)) +
+  geom_boxplot() +
+  labs(title = "Distribution of Delivery Time",
+       x = "",
+       y = "Delivery Time (mins)") +
+  theme_minimal()
+
+
+# Create a contingency table
+contingency_table <- table(data_zomato$Weatherconditions, data_zomato$Road_traffic_density)
+
+# Perform chi-square test
+chi_square_result <- chisq.test(contingency_table)
+print(chi_square_result)
+
+
+# Perform Kruskal-Wallis test
+result_kruskal <- kruskal.test(Time_Taken_mins ~ Type_of_order, data = data)
+summary(result_kruskal)
+
+result_kruskal_2 <- kruskal.test(Time_Taken_mins ~ Month_transaction, data = data)
+summary(result_kruskal)
+
+result_kruskal_3 <- kruskal.test(Time_Taken_mins ~ Type_of_vehicle, data = data)
+summary(result_kruskal)
+
+result_kruskal_4 <- kruskal.test(Time_Taken_mins ~ distance_bins, data = data)
+summary(result_kruskal)
+
+result_kruskal_5 <- kruskal.test(Time_Taken_mins ~ Day_transaction, data = data)
+summary(result_kruskal)
+
+result_mannwhitney <- wilcox.test(Time_Taken_mins ~ Festival, data = data)
+print(result_mannwhitney)
+
+
+
+ggplot(data_zomato, aes(x = City_Type, fill = City_Type)) +
+  geom_bar(stat = "count") +
+  labs(title = "Number of Deliveries by City Type",
+       x = "City Type",
+       y = "Delivery Count") +
+  theme_minimal()
